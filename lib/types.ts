@@ -59,7 +59,7 @@ export interface Order {
   userId: string;
   addressId: string;
   totalAmount: number;
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   paymentId?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -90,5 +90,15 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: "CUSTOMER" | "ADMIN";
+}
+
+export interface Review {
+  id: string;
+  productId: string;
+  userId: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: Date;
+  user?: Pick<User, "id" | "name">;
 }
