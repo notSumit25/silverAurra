@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Heart } from 'lucide-react';
-import { Product } from '@/lib/types';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import Image from "next/image";
+import Link from "next/link";
+import { Heart } from "lucide-react";
+import { Product } from "@/lib/types";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { useCart } from "@/lib/contexts/CartContext";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -13,8 +16,24 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
     : 0;
+  const { addToCart } = useCart();
+  const router = useRouter();
+
+  const onAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart(product, 1);
+    toast.success(`${product.name} added to cart`);
+  };
+
+  const onBuy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart(product, 1);
+    router.push("/cart");
+  };
 
   return (
     <Link href={`/products/${product.id}`}>
@@ -37,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </Button>
 
           <Image
-            src={product.imageUrls[0] || '/placeholder.jpg'}
+            src={product.imageUrls[0] || "/placeholder.jpg"}
             alt={product.name}
             fill
             className="object-cover transition-transform group-hover:scale-110"
@@ -49,12 +68,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-gold">
-              ₹{product.price.toLocaleString('en-IN')}
+              ₹{product.price.toLocaleString("en-IN")}
             </span>
             {product.originalPrice && (
               <>
                 <span className="text-sm text-muted-foreground line-through">
-                  ₹{product.originalPrice.toLocaleString('en-IN')}
+                  ₹{product.originalPrice.toLocaleString("en-IN")}
                 </span>
                 {discount > 0 && (
                   <Badge variant="secondary" className="text-xs">
@@ -68,6 +87,15 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.material && (
             <p className="text-xs text-muted-foreground">{product.material}</p>
           )}
+
+          <div className="mt-3 flex gap-2">
+            <Button variant="secondary" size="sm" onClick={onAdd}>
+              Add to Cart
+            </Button>
+            <Button variant="default" size="sm" onClick={onBuy}>
+              Buy
+            </Button>
+          </div>
         </div>
       </div>
     </Link>

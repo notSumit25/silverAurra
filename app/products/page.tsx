@@ -112,20 +112,22 @@ async function getPriceRange() {
 }
 
 interface ProductsPageProps {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
+  const sp = await searchParams;
+
   const [productsData, categories, priceRange] = await Promise.all([
-    getProducts(searchParams),
+    getProducts(sp),
     getCategories(),
     getPriceRange(),
   ]);
 
-  const selectedCategory = searchParams.category
-    ? categories.find((c) => c.slug === searchParams.category) ?? null
+  const selectedCategory = sp.category
+    ? categories.find((c) => c.slug === sp.category) ?? null
     : null;
 
   return (
@@ -147,10 +149,8 @@ export default async function ProductsPage({
               categories={categories}
               selectedCategory={selectedCategory}
               priceRange={priceRange}
-              minPrice={parseInt(searchParams.minPrice || "0")}
-              maxPrice={parseInt(
-                searchParams.maxPrice || priceRange.max.toString()
-              )}
+              minPrice={parseInt(sp.minPrice || "0")}
+              maxPrice={parseInt(sp.maxPrice || priceRange.max.toString())}
             />
           </Suspense>
 
@@ -168,7 +168,7 @@ export default async function ProductsPage({
               </div>
 
               <Suspense fallback={<div>Loading sort...</div>}>
-                <SortDropdown currentSort={searchParams.sort} />
+                <SortDropdown currentSort={sp.sort} />
               </Suspense>
             </div>
 
@@ -188,9 +188,11 @@ export default async function ProductsPage({
                         const isActive = page === productsData.page;
                         const params = new URLSearchParams(
                           Object.fromEntries(
-                            Object.entries(searchParams).map(([key, value]) => [
+                            Object.entries(sp).map(([key, value]) => [
                               key,
-                              Array.isArray(value) ? value.join(",") : value,
+                              Array.isArray(value)
+                                ? value.join(",")
+                                : value ?? "",
                             ])
                           )
                         );
