@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { AddToCart } from "@/components/AddToCart";
 import { ProductCard } from "@/components/ProductCard";
 import { ReviewsSection } from "@/components/ReviewsSection";
+//asd
 
 export const revalidate = 60;
 
