@@ -1,18 +1,18 @@
-import { cookies } from 'next/headers';
-import { prisma } from './prisma';
-import bcrypt from 'bcryptjs';
+import { cookies } from "next/headers";
+import { prisma } from "./prisma";
+import bcrypt from "bcryptjs";
 
 export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: "CUSTOMER" | "ADMIN";
 }
 
 export async function getSession(): Promise<SessionUser | null> {
   try {
-    const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('session');
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
 
     if (!sessionCookie) {
       return null;
@@ -36,7 +36,10 @@ export async function getSession(): Promise<SessionUser | null> {
   }
 }
 
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hashedPassword: string
+): Promise<boolean> {
   return bcrypt.compare(password, hashedPassword);
 }
 
@@ -47,15 +50,15 @@ export async function hashPassword(password: string): Promise<string> {
 export async function requireAuth() {
   const session = await getSession();
   if (!session) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
   return session;
 }
 
 export async function requireAdmin() {
   const session = await requireAuth();
-  if (session.role !== 'ADMIN') {
-    throw new Error('Forbidden: Admin access required');
+  if (session.role !== "ADMIN") {
+    throw new Error("Forbidden: Admin access required");
   }
   return session;
 }

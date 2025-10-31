@@ -1,10 +1,10 @@
-import { Suspense } from 'react';
-import { prisma } from '@/lib/prisma';
-import { Product as ProductType, Category } from '@/lib/types';
-import { ProductCard } from '@/components/ProductCard';
-import { FilterSidebar } from '@/components/FilterSidebar';
-import { SortDropdown } from '@/components/SortDropdown';
-import { ChevronDown } from 'lucide-react';
+import { Suspense } from "react";
+import { prisma } from "@/lib/prisma";
+import { Product as ProductType, Category } from "@/lib/types";
+import { ProductCard } from "@/components/ProductCard";
+import { FilterSidebar } from "@/components/FilterSidebar";
+import { SortDropdown } from "@/components/SortDropdown";
+import { ChevronDown } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -39,23 +39,23 @@ async function getProducts(params: SearchParams) {
       }
     }
 
-    let orderBy: any = { createdAt: 'desc' };
+    let orderBy: any = { createdAt: "desc" };
 
     switch (params.sort) {
-      case 'price-asc':
-        orderBy = { price: 'asc' };
+      case "price-asc":
+        orderBy = { price: "asc" };
         break;
-      case 'price-desc':
-        orderBy = { price: 'desc' };
+      case "price-desc":
+        orderBy = { price: "desc" };
         break;
-      case 'newest':
-        orderBy = { createdAt: 'desc' };
+      case "newest":
+        orderBy = { createdAt: "desc" };
         break;
-      case 'bestseller':
-        orderBy = [{ bestseller: 'desc' }, { createdAt: 'desc' }];
+      case "bestseller":
+        orderBy = [{ bestseller: "desc" }, { createdAt: "desc" }];
         break;
       default:
-        orderBy = { createdAt: 'desc' };
+        orderBy = { createdAt: "desc" };
     }
 
     const products = await prisma.product.findMany({
@@ -63,7 +63,7 @@ async function getProducts(params: SearchParams) {
       include: { category: true },
       orderBy,
       take: 12,
-      skip: (parseInt(params.page || '1') - 1) * 12,
+      skip: (parseInt(params.page || "1") - 1) * 12,
     });
 
     const totalCount = await prisma.product.count({ where });
@@ -71,11 +71,11 @@ async function getProducts(params: SearchParams) {
     return {
       products: products as ProductType[],
       total: totalCount,
-      page: parseInt(params.page || '1'),
+      page: parseInt(params.page || "1"),
       totalPages: Math.ceil(totalCount / 12),
     };
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error("Error fetching products:", error);
     return { products: [], total: 0, page: 1, totalPages: 1 };
   }
 }
@@ -83,7 +83,7 @@ async function getProducts(params: SearchParams) {
 async function getCategories(): Promise<Category[]> {
   try {
     return await prisma.category.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
   } catch (error) {
     return [];
@@ -93,12 +93,12 @@ async function getCategories(): Promise<Category[]> {
 async function getPriceRange() {
   try {
     const minProduct = await prisma.product.findFirst({
-      orderBy: { price: 'asc' },
+      orderBy: { price: "asc" },
       select: { price: true },
     });
 
     const maxProduct = await prisma.product.findFirst({
-      orderBy: { price: 'desc' },
+      orderBy: { price: "desc" },
       select: { price: true },
     });
 
@@ -115,7 +115,9 @@ interface ProductsPageProps {
   searchParams: SearchParams;
 }
 
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+export default async function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
   const [productsData, categories, priceRange] = await Promise.all([
     getProducts(searchParams),
     getCategories(),
@@ -123,7 +125,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   ]);
 
   const selectedCategory = searchParams.category
-    ? (categories.find((c) => c.slug === searchParams.category) ?? null)
+    ? categories.find((c) => c.slug === searchParams.category) ?? null
     : null;
 
   return (
@@ -132,7 +134,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="container">
           <h1 className="text-3xl font-bold font-serif mb-2">All Jewellery</h1>
           <p className="text-muted-foreground">
-            Showing {productsData.products.length} of {productsData.total} products
+            Showing {productsData.products.length} of {productsData.total}{" "}
+            products
           </p>
         </div>
       </div>
@@ -144,8 +147,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               categories={categories}
               selectedCategory={selectedCategory}
               priceRange={priceRange}
-              minPrice={parseInt(searchParams.minPrice || '0')}
-              maxPrice={parseInt(searchParams.maxPrice || priceRange.max.toString())}
+              minPrice={parseInt(searchParams.minPrice || "0")}
+              maxPrice={parseInt(
+                searchParams.maxPrice || priceRange.max.toString()
+              )}
             />
           </Suspense>
 
@@ -158,7 +163,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         productsData.page * 12,
                         productsData.total
                       )} of ${productsData.total} results`
-                    : 'No products found'}
+                    : "No products found"}
                 </p>
               </div>
 
@@ -177,26 +182,35 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
                 {productsData.totalPages > 1 && (
                   <div className="flex items-center justify-center gap-2 py-8">
-                    {Array.from({ length: productsData.totalPages }).map((_, i) => {
-                      const page = i + 1;
-                      const isActive = page === productsData.page;
-                      const params = new URLSearchParams(searchParams as any);
-                      params.set('page', page.toString());
+                    {Array.from({ length: productsData.totalPages }).map(
+                      (_, i) => {
+                        const page = i + 1;
+                        const isActive = page === productsData.page;
+                        const params = new URLSearchParams(
+                          Object.fromEntries(
+                            Object.entries(searchParams).map(([key, value]) => [
+                              key,
+                              Array.isArray(value) ? value.join(",") : value,
+                            ])
+                          )
+                        );
+                        params.set("page", page.toString());
 
-                      return (
-                        <a
-                          key={page}
-                          href={`/products?${params.toString()}`}
-                          className={`px-3 py-2 rounded-lg transition-colors ${
-                            isActive
-                              ? 'bg-gold text-white'
-                              : 'bg-gray-100 text-foreground hover:bg-gray-200'
-                          }`}
-                        >
-                          {page}
-                        </a>
-                      );
-                    })}
+                        return (
+                          <a
+                            key={page}
+                            href={`/products?${params.toString()}`}
+                            className={`px-3 py-2 rounded-lg transition-colors ${
+                              isActive
+                                ? "bg-gold text-white"
+                                : "bg-gray-100 text-foreground hover:bg-gray-200"
+                            }`}
+                          >
+                            {page}
+                          </a>
+                        );
+                      }
+                    )}
                   </div>
                 )}
               </>
